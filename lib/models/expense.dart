@@ -6,6 +6,7 @@ class Expense {
   final double amount;
   final String category;
   final DateTime date;
+  final String? description; // add this field
 
   Expense({
     required this.id,
@@ -13,6 +14,7 @@ class Expense {
     required this.amount,
     required this.category,
     required this.date,
+    this.description,
   });
 
   // Convert Firestore document to Expense
@@ -24,6 +26,7 @@ class Expense {
       amount: (data['amount'] ?? 0).toDouble(),
       category: data['category'] ?? 'Other',
       date: (data['date'] as Timestamp).toDate(),
+      description: data['description'], // map from Firestore
     );
   }
 
@@ -34,6 +37,7 @@ class Expense {
       'amount': amount,
       'category': category,
       'date': Timestamp.fromDate(date),
+      'description': description,
     };
   }
 }

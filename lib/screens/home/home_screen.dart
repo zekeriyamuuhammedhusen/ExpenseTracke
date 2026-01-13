@@ -10,7 +10,7 @@ import '../../services/stripe_service.dart';
 import '../ai/ai_chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key}); // removed const
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,9 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    final manager = Provider.of<ExpenseManager>(context, listen: false);
-    manager.fetchWallet();
-    manager.listenExpenses();
+
+    // Delay async calls until after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final manager = Provider.of<ExpenseManager>(context, listen: false);
+      await manager.fetchWallet();
+      manager.listenExpenses();
+    });
   }
 
   @override
@@ -39,23 +43,27 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          // 🌙 DARK MODE TOGGLE
+          // 🌙 Dark mode toggle
           IconButton(
-            icon: Icon(
-              themeProvider.isDark ? Icons.light_mode : Icons.dark_mode,
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) =>
+                  RotationTransition(turns: animation, child: child),
+              child: Icon(
+                themeProvider.isDark ? Icons.light_mode : Icons.dark_mode,
+                key: ValueKey(themeProvider.isDark ? 'light' : 'dark'),
+              ),
             ),
-            onPressed: () {
-              themeProvider.toggleTheme();
-            },
+            onPressed: () => themeProvider.toggleTheme(),
           ),
 
-          // 📊 REPORT
+          // 📊 Reports
           IconButton(
             icon: const Icon(Icons.bar_chart),
             onPressed: () => Navigator.pushNamed(context, AppRoutes.report),
           ),
 
-          // 🚪 LOGOUT
+          // 🚪 Logout
           IconButton(
             icon: _isLoggingOut
                 ? const SizedBox(
@@ -68,173 +76,129 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? null
                 : () async {
               setState(() => _isLoggingOut = true);
-
               try {
                 await AuthService.logout();
                 if (!mounted) return;
                 Navigator.of(context)
                     .pushNamedAndRemoveUntil('/', (_) => false);
               } finally {
-                if (mounted) {
-                  setState(() => _isLoggingOut = false);
-                }
+                if (mounted) setState(() => _isLoggingOut = false);
               }
             },
           ),
         ],
       ),
-
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await manager.fetchWallet();
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // ================= WALLET CARD =================
-              if (manager.wallet != null)
-                Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Wallet Overview",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async => await manager.fetchWallet(),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (manager.wallet != null)
+                  Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Wallet Overview",
+                            style: TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Total Income",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              manager.wallet!.total.toString(),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Remaining",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              manager.wallet!.remaining.toString(),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          manager.getWarning(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Total Income",
+                                  style: TextStyle(fontSize: 16)),
+                              Text(manager.wallet!.total.toString(),
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600)),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Remaining",
+                                  style: TextStyle(fontSize: 16)),
+                              Text(manager.wallet!.remaining.toString(),
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(manager.getWarning(),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error)),
+                        ],
+                      ),
                     ),
                   ),
+                const SizedBox(height: 24),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Recent Expenses",
+                      style:
+                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 ),
-
-              const SizedBox(height: 24),
-
-              // ================= RECENT EXPENSES =================
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Recent Expenses",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              Expanded(
-                child: manager.expenses.isEmpty
-                    ? const Center(
-                  child: Text(
-                    "No expenses yet.\nTap + to add one.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: manager.expenses.isEmpty
+                      ? const Center(
+                    child: Text(
+                      "No expenses yet.\nTap + to add one.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  )
+                      : Padding(
+                    padding: const EdgeInsets.only(bottom: 120),
+                    child: ExpenseList(expenses: manager.expenses),
                   ),
-                )
-                    : Padding(
-                  padding: const EdgeInsets.only(bottom: 120),
-                  child: ExpenseList(expenses: manager.expenses),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-
-      // ================= FLOATING ACTION AREA =================
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           SizedBox(
             width: MediaQuery.of(context).size.width - 32,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // 💳 STRIPE
                 FloatingActionButton.extended(
                   heroTag: "stripe",
                   icon: const Icon(Icons.payment),
                   label: const Text("Pay"),
-                  onPressed: () {
-                    StripeService.pay(
-                      context: context,
-                      amount: 200,
-                    );
-                  },
+                  onPressed: () => StripeService.pay(context: context, amount: 200),
                 ),
-
-                // 🤖 AI
                 FloatingActionButton.extended(
                   heroTag: "ai",
                   icon: const Icon(Icons.auto_awesome),
                   label: const Text("AI Assistant"),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AiChatScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AiChatScreen()),
+                  ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // ➕ ADD EXPENSE
           FloatingActionButton(
             heroTag: "add",
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.addExpense),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.addExpense),
             child: const Icon(Icons.add),
           ),
         ],

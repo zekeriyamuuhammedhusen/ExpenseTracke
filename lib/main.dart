@@ -21,26 +21,35 @@ import 'routes/app_routes.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load environment variables
   await dotenv.load(fileName: ".env");
 
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ STRIPE INITIALIZATION (COMPLETE)
+  // Initialize Stripe
   final stripeKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
-  if (stripeKey == null || stripeKey.isEmpty) {
-    debugPrint("⚠️ Stripe key not found in .env");
-  } else {
-    Stripe.publishableKey = stripeKey;
-    await Stripe.instance.applySettings();
+
+  try {
+    if (stripeKey != null && stripeKey.isNotEmpty) {
+      Stripe.publishableKey = stripeKey;
+      await Stripe.instance.applySettings();
+      debugPrint("✅ Stripe initialized");
+    } else {
+      debugPrint("⚠️ Stripe key not found in .env");
+    }
+  } catch (e) {
+    debugPrint("❌ Stripe init failed: $e");
   }
 
-  runApp(const MyApp());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +62,7 @@ class MyApp extends StatelessWidget {
         builder: (context, theme, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-
-            // 🌙 THEME
-            themeMode: theme.mode,
+            themeMode: theme.themeMode,
             theme: ThemeData(
               useMaterial3: true,
               colorSchemeSeed: Colors.indigo,
@@ -66,16 +73,12 @@ class MyApp extends StatelessWidget {
               colorSchemeSeed: Colors.indigo,
               brightness: Brightness.dark,
             ),
-
-            // 📍 ROUTES
             routes: {
-              AppRoutes.addExpense: (_) => const AddExpenseScreen(),
-              AppRoutes.report: (_) => const ReportScreen(),
-              AppRoutes.settings: (_) => const SettingsScreen(),
+              AppRoutes.addExpense: (_) => AddExpenseScreen(),
+              AppRoutes.report: (_) => ReportScreen(),
+              AppRoutes.settings: (_) => SettingsScreen(),
             },
-
-            // 🔐 AUTH STATE HANDLER (CORRECT & SAFE)
-            home: AuthGate(),
+            home: AuthGate(), // removed const
           );
         },
       ),
@@ -83,34 +86,27 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// 🔐 AUTH GATE (BEST PRACTICE)
+/// AuthGate: handles login, email verification, and home navigation
 class AuthGate extends StatelessWidget {
+  AuthGate({super.key}); // removed const
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // ⏳ LOADING
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // ❌ NOT LOGGED IN
-        if (!snapshot.hasData) {
-          return const LoginScreen();
-        }
+        if (!snapshot.hasData) return LoginScreen(); // removed const
 
         final user = snapshot.data!;
+        if (!user.emailVerified) return VerifyEmailScreen(); // removed const
 
-        // 📧 EMAIL NOT VERIFIED
-        if (!user.emailVerified) {
-          return const VerifyEmailScreen();
-        }
-
-        // ✅ LOGGED IN
-        return const HomeScreen();
+        return HomeScreen(); // removed const
       },
     );
   }
