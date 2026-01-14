@@ -1,8 +1,8 @@
-Expense Tracker
+#Expense Tracker
 
 A modern Flutter expense tracking application powered by Firebase, with Stripe payment integration and an AI assistant using Google Gemini.
 
-Features
+##Features
 
 User authentication (Register, Login, Email verification)
 
@@ -33,7 +33,9 @@ images
   <img src="assets/img_5.png" width="250" alt="Payment Screen"/>
 </p>
 
-Quick Start
+##Quick Start
+
+
 1. Install Dependencies
 flutter pub get
 
@@ -72,7 +74,7 @@ STRIPE_PAYMENT_URL=https://your-stripe-backend-url/create-payment-intent
 
 Node.js is used only to securely create Stripe PaymentIntents.
 
-on render fill this 
+on render fill this form
 Build Command: npm install
 Start Command: npm start
 
@@ -117,8 +119,9 @@ Purpose: Stripe PaymentIntent creation
 
 Hosting: Render 
 
-Architecture
-ExpenseTracker
+###Architecture
+
+#ExpenseTracker
 ├── Flutter App
 │   ├── Firebase Auth (Users)
 │   ├── Firestore (Expenses & Wallet)
@@ -128,7 +131,8 @@ ExpenseTracker
 └── Payment Backend (Node.js)
 └── Stripe PaymentIntent API
 
-Project Structure
+###Project Structure
+
 lib/
 ├── screens/
 │   ├── auth/
