@@ -10,7 +10,7 @@ import '../../services/stripe_service.dart';
 import '../ai/ai_chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key}); // removed const
+  HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,8 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Delay async calls until after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final manager = Provider.of<ExpenseManager>(context, listen: false);
       await manager.fetchWallet();
@@ -38,12 +36,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        /// ⚙️ SETTINGS (TOP LEFT)
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.settings);
+          },
+        ),
+
         title: const Text(
           "Expense Tracker",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
         actions: [
-          // 🌙 Dark mode toggle
+          /// 🌙 DARK MODE
           IconButton(
             icon: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -57,13 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => themeProvider.toggleTheme(),
           ),
 
-          // 📊 Reports
+          /// 📊 REPORT
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.report),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.report),
           ),
 
-          // 🚪 Logout
+          /// 🚪 LOGOUT
           IconButton(
             icon: _isLoggingOut
                 ? const SizedBox(
@@ -82,12 +90,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.of(context)
                     .pushNamedAndRemoveUntil('/', (_) => false);
               } finally {
-                if (mounted) setState(() => _isLoggingOut = false);
+                if (mounted) {
+                  setState(() => _isLoggingOut = false);
+                }
               }
             },
           ),
         ],
       ),
+
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => await manager.fetchWallet(),
@@ -108,48 +119,64 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Text(
                             "Wallet Overview",
                             style: TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("Total Income",
                                   style: TextStyle(fontSize: 16)),
-                              Text(manager.wallet!.total.toString(),
-                                  style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600)),
+                              Text(
+                                manager.wallet!.total.toString(),
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("Remaining",
                                   style: TextStyle(fontSize: 16)),
-                              Text(manager.wallet!.remaining.toString(),
-                                  style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                manager.wallet!.remaining.toString(),
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          Text(manager.getWarning(),
-                              style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error)),
+                          Text(
+                            manager.getWarning(),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .error),
+                          ),
                         ],
                       ),
                     ),
                   ),
+
                 const SizedBox(height: 24),
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Recent Expenses",
-                      style:
-                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    "Recent Expenses",
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const SizedBox(height: 12),
+
                 Expanded(
                   child: manager.expenses.isEmpty
                       ? const Center(
@@ -160,8 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   )
                       : Padding(
-                    padding: const EdgeInsets.only(bottom: 120),
-                    child: ExpenseList(expenses: manager.expenses),
+                    padding:
+                    const EdgeInsets.only(bottom: 120),
+                    child: ExpenseList(
+                        expenses: manager.expenses),
                   ),
                 ),
               ],
@@ -169,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -181,7 +211,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   heroTag: "stripe",
                   icon: const Icon(Icons.payment),
                   label: const Text("Pay"),
-                  onPressed: () => StripeService.pay(context: context, amount: 200),
+                  onPressed: () => StripeService.pay(
+                    context: context,
+                    amount: 200,
+                  ),
                 ),
                 FloatingActionButton.extended(
                   heroTag: "ai",
@@ -189,7 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: const Text("AI Assistant"),
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AiChatScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const AiChatScreen()),
                   ),
                 ),
               ],
@@ -198,7 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           FloatingActionButton(
             heroTag: "add",
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.addExpense),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.addExpense),
             child: const Icon(Icons.add),
           ),
         ],

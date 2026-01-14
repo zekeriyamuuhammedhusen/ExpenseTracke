@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'register_screen.dart';
+import '../../screens/home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool loading = false;
   bool showPassword = false;
 
+  /// 🔑 Handles login and navigation on success
   Future<void> submit() async {
     setState(() => loading = true);
 
@@ -29,7 +31,22 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result != null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(result)));
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
     }
+  }
+
+  InputDecoration inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon),
+      labelText: label,
+      filled: true,
+      fillColor: Colors.grey.shade200, // background color for label
+      border: const OutlineInputBorder(),
+    );
   }
 
   @override
@@ -56,24 +73,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.account_balance_wallet,
-                        size: 60, color: Colors.indigo),
+                    const Icon(
+                      Icons.account_balance_wallet,
+                      size: 60,
+                      color: Colors.indigo,
+                    ),
                     const SizedBox(height: 12),
                     const Text(
                       "Welcome Back",
-                      style:
-                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 24),
 
                     // EMAIL
                     TextField(
                       controller: email,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.email),
-                        labelText: "Email",
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: inputDecoration("Email", Icons.email),
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
 
@@ -81,20 +100,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: password,
                       obscureText: !showPassword,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.lock),
-                        labelText: "Password",
-                        border: const OutlineInputBorder(),
+                      decoration: inputDecoration("Password", Icons.lock).copyWith(
                         suffixIcon: IconButton(
-                          icon: Icon(showPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                          icon: Icon(
+                              showPassword ? Icons.visibility : Icons.visibility_off),
                           onPressed: () =>
                               setState(() => showPassword = !showPassword),
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 24),
 
                     // LOGIN BUTTON
@@ -106,13 +120,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: loading ? null : submit,
                         label: loading
                             ? const CircularProgressIndicator(
-                            color: Colors.white)
+                          color: Colors.white,
+                        )
                             : const Text("Login"),
                       ),
                     ),
-
                     const SizedBox(height: 12),
 
+                    // CREATE ACCOUNT
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -125,21 +140,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text("Create an account"),
                     ),
 
+                    // FORGOT PASSWORD
                     TextButton(
                       onPressed: () async {
                         if (email.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Enter email first")),
+                            const SnackBar(content: Text("Enter email first")),
                           );
                           return;
                         }
                         final res =
                         await AuthService.resetPassword(email.text.trim());
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  res ?? "Password reset email sent")),
+                          SnackBar(content: Text(res ?? "Password reset email sent")),
                         );
                       },
                       child: const Text("Forgot Password?"),

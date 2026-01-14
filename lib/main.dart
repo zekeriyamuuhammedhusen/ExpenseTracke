@@ -9,12 +9,12 @@ import 'firebase_options.dart';
 import 'providers/app_providers.dart';
 import 'theme/theme_provider.dart';
 
-import 'screens/auth/login_screen.dart';
+import 'screens/auth/welcome_screen.dart';
 import 'screens/auth/verify_email_screen.dart';
 import 'screens/home/home_screen.dart';
-import 'screens/setting/settings_screen.dart';
 import 'screens/expense/add_expense_screen.dart';
 import 'screens/report/report_screen.dart';
+import 'screens/setting/settings_screen.dart';
 
 import 'routes/app_routes.dart';
 
@@ -31,7 +31,6 @@ Future<void> main() async {
 
   // Initialize Stripe
   final stripeKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
-
   try {
     if (stripeKey != null && stripeKey.isNotEmpty) {
       Stripe.publishableKey = stripeKey;
@@ -41,15 +40,14 @@ Future<void> main() async {
       debugPrint("⚠️ Stripe key not found in .env");
     }
   } catch (e) {
-    debugPrint("❌ Stripe init failed: $e");
+    debugPrint("❌ Stripe initialization failed: $e");
   }
-
 
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  MyApp({super.key}); // removed const
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +84,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// AuthGate: handles login, email verification, and home navigation
+/// 🔐 AuthGate: directs users based on authentication & email verification
 class AuthGate extends StatelessWidget {
   AuthGate({super.key}); // removed const
 
@@ -95,18 +93,23 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
+        // Show loading indicator while waiting
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (!snapshot.hasData) return LoginScreen(); // removed const
+        // ❌ Not logged in → Welcome Screen
+        if (!snapshot.hasData) return WelcomeScreen();
 
         final user = snapshot.data!;
-        if (!user.emailVerified) return VerifyEmailScreen(); // removed const
 
-        return HomeScreen(); // removed const
+        // ⚠ Email not verified → VerifyEmailScreen
+        if (!user.emailVerified) return VerifyEmailScreen();
+
+        // ✅ Logged in → HomeScreen
+        return HomeScreen();
       },
     );
   }

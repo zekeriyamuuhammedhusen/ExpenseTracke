@@ -41,6 +41,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     Navigator.pop(context);
   }
 
+  InputDecoration inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon),
+      labelText: label,
+      filled: true,
+      fillColor: Colors.grey.shade200, // background color for label
+      border: const OutlineInputBorder(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,27 +60,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.person_add,
-                size: 60, color: Colors.indigo),
+            const Icon(Icons.person_add, size: 60, color: Colors.indigo),
             const SizedBox(height: 24),
 
+            // EMAIL
             TextField(
               controller: email,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.email),
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
+              keyboardType: TextInputType.emailAddress,
+              decoration: inputDecoration("Email", Icons.email),
             ),
             const SizedBox(height: 16),
 
+            // PASSWORD
             TextField(
               controller: password,
               obscureText: !showPassword,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.lock),
-                labelText: "Password",
-                border: const OutlineInputBorder(),
+              decoration: inputDecoration("Password", Icons.lock).copyWith(
                 suffixIcon: IconButton(
                   icon: Icon(showPassword
                       ? Icons.visibility
@@ -82,17 +87,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 16),
 
+            // INCOME
             TextField(
               controller: income,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.attach_money),
-                labelText: "Monthly Income",
-                border: OutlineInputBorder(),
-              ),
+              decoration: inputDecoration("Monthly Income", Icons.attach_money),
             ),
             const SizedBox(height: 24),
 
+            // CREATE ACCOUNT BUTTON
             SizedBox(
               width: double.infinity,
               height: 48,
