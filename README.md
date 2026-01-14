@@ -1,25 +1,22 @@
-#Expense Tracker
+# Expense Tracker
 
 A modern Flutter expense tracking application powered by Firebase, with Stripe payment integration and an AI assistant using Google Gemini.
 
-##Features
+---
 
-User authentication (Register, Login, Email verification)
+## Features
 
-Firebase-backed real-time expense tracking
+- User authentication (Register, Login, Email verification)
+- Firebase-backed real-time expense tracking
+- Wallet overview (total income & remaining balance)
+- Stripe payment integration (secure PaymentIntent flow)
+- AI assistant powered by Google Gemini
+- Light & Dark mode support
+- Clean and responsive Material 3 UI
 
-Wallet overview (total income & remaining balance)
+---
 
-Stripe payment integration (secure PaymentIntent flow)
-
-AI assistant powered by Google Gemini
-
-Light & Dark mode support
-
-Clean and responsive Material 3 UI
-
-images
-<h2 align="center">📱 App Screenshots</h2>
+## 📱 App Screenshots
 
 <p align="center">
   <img src="assets/img.png" width="250" alt="Home Screen"/>
@@ -33,15 +30,18 @@ images
   <img src="assets/img_5.png" width="250" alt="Payment Screen"/>
 </p>
 
-##Quick Start
+---
 
+## Quick Start
 
-1. Install Dependencies
+### 1. Install Dependencies
+```bash
 flutter pub get
+
 
 2. Firebase Setup
 
-Create a Firebase project
+Create a Firebase project.
 
 Enable:
 
@@ -72,18 +72,21 @@ STRIPE_PAYMENT_URL=https://your-stripe-backend-url/create-payment-intent
 
 4. Stripe Payment Backend (Node.js – Payment Only)
 
-Node.js is used only to securely create Stripe PaymentIntents.
+Node.js backend is used only to securely create Stripe PaymentIntents.
 
-on render fill this form
+On Render fill this form:
+
 Build Command: npm install
+
 Start Command: npm start
 
-
-payment run on this url:
+Payment backend URL:
 
 https://stripe-backend-lnce.onrender.com
 
-Backend .env
+
+Backend .env file:
+
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 PORT=3000
 
@@ -91,9 +94,9 @@ PORT=3000
 All user data and business logic remain in Firebase.
 
 5. Run Flutter App
-   flutter run
-
+flutter run
 Technology Stack
+
 Frontend
 
 Framework: Flutter (Dart)
@@ -112,16 +115,17 @@ UI: Material Design 3
 
 Backend (Payment Only)
 
-Payment requirement
 Runtime: Node.js
+
 Framework: Express.js
+
 Purpose: Stripe PaymentIntent creation
 
-Hosting: Render 
+Hosting: Render
 
-###Architecture
+Architecture
 
-#ExpenseTracker
+# ExpenseTracker
 ├── Flutter App
 │   ├── Firebase Auth (Users)
 │   ├── Firestore (Expenses & Wallet)
@@ -129,10 +133,10 @@ Hosting: Render
 │   └── Gemini AI (Chat Assistant)
 │
 └── Payment Backend (Node.js)
-└── Stripe PaymentIntent API
+    └── Stripe PaymentIntent API
 
-###Project Structure
 
+Project Structure
 lib/
 ├── screens/
 │   ├── auth/
@@ -153,10 +157,14 @@ backend/
 
 Security Notes
 
-Stripe secret key never exposed to Flutter
+Stripe secret key is never exposed to Flutter.
 
-Firebase handles authentication & data security
+Firebase handles authentication & data security.
 
-.env files are excluded from version control
+.env files are excluded from version control.
 
-Use Firebase Security Rules before production
+Use Firebase Security Rules before production.
+
+
+---
+
